@@ -117,27 +117,17 @@ export class EnhancedQecSimulationEngine {
   ): Promise<MultiAIAnalysisResponse> {
     const reps = await representations;
     
-    // Use multi-AI orchestrator for enhanced analysis
-    const analysisPrompt = `
-      Analyze this logical specification unit (LSU) across multiple dimensions:
-      
-      Original LSU: ${lsu}
-      
-      Representations available:
-      ${Object.keys(reps).map(key => `- ${key}: ${reps[key].substring(0, 200)}...`).join('\n')}
-      
-      Please provide comprehensive analysis covering:
-      1. Syntax validation
-      2. Semantic consistency
-      3. Security implications
-      4. Performance considerations
-      5. Compliance requirements
-      
-      Run ID: ${runId}
-    `;
+    // Prepare analysis request for multi-AI orchestrator
+    const analysisRequest = {
+      lsu,
+      context: `Analysis for run ${runId}. Generated representations: ${Object.keys(reps).join(', ')}`,
+      analysisType: 'comprehensive' as const,
+      enableReasoning: true,
+      enableParallelAnalysis: true
+    };
 
     try {
-      return await multiAIOrchestrator.analyzeWithMultipleProviders(analysisPrompt);
+      return await multiAIOrchestrator.performAnalysis(analysisRequest);
     } catch (error) {
       console.warn('Multi-AI analysis failed, using fallback analysis:', error);
       
@@ -146,18 +136,20 @@ export class EnhancedQecSimulationEngine {
         primaryAnalysis: {
           analysis: `Fallback analysis for LSU: ${lsu.substring(0, 100)}...`,
           confidence: 0.6,
-          reasoning: "Using fallback analysis due to AI service unavailability"
+          recommendations: [`Review LSU: ${lsu.substring(0, 50)}...`],
+          riskFactors: [`AI services unavailable for run ${runId}`]
         },
         reasoningAnalysis: null,
         hybridInsights: null,
-        traditionalAnalysis: {
-          basicValidation: true,
-          errors: [],
-          warnings: [`AI services unavailable for run ${runId}`]
-        },
-        hybridScore: 0.6,
+        providerUsed: 'nvidia' as AIProvider,
         confidence: 0.6,
-        providerUsed: 'fallback' as AIProvider
+        processingTime: 100,
+        recommendations: [`Review LSU: ${lsu.substring(0, 50)}...`],
+        riskFactors: [`AI services unavailable for run ${runId}`],
+        serviceStatus: {
+          nvidia: { available: false, configured: false },
+          groq: { available: false, configured: false }
+        }
       };
     }
   }
@@ -166,16 +158,8 @@ export class EnhancedQecSimulationEngine {
    * Generate enhanced syndrome from multi-AI analysis
    */
   private generateEnhancedSyndrome(analysis: MultiAIAnalysisResponse, runId: string): SemanticSyndrome {
-    const errors: string[] = [];
+    const errors: string[] = analysis.riskFactors || [];
     const warnings: string[] = [];
-
-    // Extract errors and warnings from analysis
-    if (analysis.traditionalAnalysis?.errors) {
-      errors.push(...analysis.traditionalAnalysis.errors);
-    }
-    if (analysis.traditionalAnalysis?.warnings) {
-      warnings.push(...analysis.traditionalAnalysis.warnings);
-    }
 
     // Add confidence-based warnings
     if (analysis.confidence < 0.7) {
@@ -298,12 +282,10 @@ ${lsu}
 - **Status:** INCOHERENT ❌
 
 ## Detected Issues
-${analysis.traditionalAnalysis?.errors?.map(error => `- ${error}`).join('\n') || '- Semantic inconsistencies detected'}
+${analysis.riskFactors?.map(error => `- ${error}`).join('\n') || '- Semantic inconsistencies detected'}
 
 ## Recommended Actions
-1. Review the logical specification for consistency
-2. Validate against formal requirements
-3. Re-submit after corrections
+${analysis.recommendations?.map((rec, i) => `${i + 1}. ${rec}`).join('\n') || '1. Review the logical specification for consistency\n2. Validate against formal requirements\n3. Re-submit after corrections'}
 
 ---
 *Generated: ${timestamp}*
