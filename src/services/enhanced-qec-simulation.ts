@@ -1,12 +1,3 @@
-import { 
-  CertifiedArtifactPackage, 
-  SemanticSyndrome, 
-  CertificateOfSemanticIntegrity,
-  StabilizerCheck 
-} from '../types/qec-types';
-import { multiAIOrchestrator, AIProvider, MultiAIAnalysisResponse } from './multi-ai-orchestrator';
-import { nvidiaClient } from './nvidia-client';
-
 /**
  * Enhanced QEC-SFT simulation engine with multi-AI orchestration
  */
@@ -166,11 +157,23 @@ export class EnhancedQecSimulationEngine {
       warnings.push(`Low confidence analysis (${(analysis.confidence * 100).toFixed(1)}%)`);
     }
 
-    return {
+    // Generate traditional syndrome structure
+    const stabilizerMap = this.stabilizers.map(stabilizer => ({
+      name: stabilizer.name,
+      outcome: (errors.length === 0 ? 1 : -1) as 1 | -1,
+      description: stabilizer.description,
+      confidence: analysis.confidence
+    }));
+
+    const syndrome: SemanticSyndrome = {
+      lsu_id: runId,
       syndrome_id: `syndrome-${runId}`,
       detected_errors: errors,
       confidence_score: analysis.confidence,
       ai_provider_used: analysis.providerUsed,
+      stabilizer_map: stabilizerMap,
+      vector: stabilizerMap.map(s => s.outcome),
+      coherence_score: analysis.confidence,
       stabilizer_measurements: this.stabilizers.map(stabilizer => ({
         stabilizer_name: stabilizer.name,
         measurement_result: errors.length === 0 ? 1 : 0,
@@ -187,6 +190,8 @@ export class EnhancedQecSimulationEngine {
         warnings
       }
     };
+
+    return syndrome;
   }
 
   /**
@@ -197,18 +202,21 @@ export class EnhancedQecSimulationEngine {
     analysis: MultiAIAnalysisResponse, 
     runId: string
   ): Promise<CertificateOfSemanticIntegrity> {
-    const hasErrors = syndrome.detected_errors.length > 0;
-    const severity = this.determineSeverity(syndrome.detected_errors);
+    const hasErrors = (syndrome.detected_errors || []).length > 0;
+    const severity = this.determineSeverity(syndrome.detected_errors || []);
     
     return {
+      diagnosis_id: `diag-${runId}`,
       certificate_id: `cert-${runId}`,
       lsu_id: runId,
       status: hasErrors ? "INCOHERENT" : "COHERENT",
+      certified_at: new Date().toISOString(),
       confidence_level: analysis.confidence,
-     syndrome_vector: syndrome.stabilizer_measurements.map(measurement => measurement.measurement_result),
-     coherence_score: syndrome.confidence_score,
+      syndrome_vector: syndrome.stabilizer_measurements?.map(measurement => measurement.measurement_result) || syndrome.vector,
+      sde_version: "v8.2.0-production",
+      coherence_score: syndrome.confidence_score || syndrome.coherence_score,
       ai_reasoning_summary: analysis.reasoningAnalysis?.reasoning || analysis.primaryAnalysis?.reasoning || "Standard analysis completed",
-      semantic_violations: syndrome.detected_errors.map(error => ({
+      semantic_violations: (syndrome.detected_errors || []).map(error => ({
         violation_type: "semantic_inconsistency",
         description: error,
         severity,
@@ -226,6 +234,15 @@ export class EnhancedQecSimulationEngine {
           "qwen/qwen3-32b",
         confidence_threshold: 0.85,
         multi_ai_consensus: analysis.providerUsed === 'hybrid'
+      },
+      risk_assessment: {
+        severity,
+        impact_analysis: hasErrors ? 
+          `${syndrome.detected_errors?.length || 0} semantic violations detected` :
+          "All semantic checks passed successfully",
+        mitigation_strategy: hasErrors ?
+          "Review and address identified semantic violations" :
+          "Continue with standard monitoring procedures"
       }
     };
   }

@@ -12,6 +12,12 @@ const EnhancedResultDisplay: React.FC<EnhancedResultDisplayProps> = ({ result })
   const isCoherent = certificate.status === 'COHERENT';
   const payload = result.payload;
 
+  // Safely access syndrome_vector with fallback
+  const syndromeVector = certificate.syndrome_vector || [];
+  const failedChecks = syndromeVector
+    .map((outcome, index) => ({ outcome, index }))
+    .filter(item => item.outcome === -1);
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
   };
@@ -99,7 +105,7 @@ const EnhancedResultDisplay: React.FC<EnhancedResultDisplayProps> = ({ result })
           </div>
           <div className="metric-card text-center">
             <div className="text-2xl font-bold accent mb-1">
-              {certificate.syndrome_vector.filter(v => v === 1).length}/5
+              {syndromeVector.filter(v => v === 1).length}/{syndromeVector.length || 5}
             </div>
             <div className="text-secondary text-sm">Checks Passed</div>
           </div>
@@ -135,7 +141,7 @@ const EnhancedResultDisplay: React.FC<EnhancedResultDisplayProps> = ({ result })
         </h3>
         
         <div className="grid gap-4">
-          {certificate.syndrome_vector.map((outcome, index) => {
+          {syndromeVector.map((outcome, index) => {
             const checkNames = [
               'Syntax Validation',
               'Semantic Consistency', 
@@ -155,7 +161,7 @@ const EnhancedResultDisplay: React.FC<EnhancedResultDisplayProps> = ({ result })
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium">{checkNames[index]}</p>
+                    <p className="font-medium">{checkNames[index] || `Check #${index + 1}`}</p>
                     <p className="text-sm text-secondary mt-1">
                       Result: {outcome === 1 ? 'PASS' : 'FAIL'}
                     </p>

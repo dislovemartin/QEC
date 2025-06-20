@@ -31,6 +31,8 @@ export interface MultiAIAnalysisResponse {
   primaryAnalysis: any;
   reasoningAnalysis?: any;
   hybridInsights?: any;
+  traditionalAnalysis?: any;
+  hybridScore?: number;
   providerUsed: AIProvider;
   confidence: number;
   processingTime: number;

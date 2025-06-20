@@ -123,6 +123,12 @@ export class NvidiaClient {
     return await response.json() as NvidiaResponse;
   }
 
+  async generateText(prompt: string, options: Partial<NvidiaRequest> = {}): Promise<string> {
+    const systemPrompt = 'You are a helpful AI assistant specialized in generating high-quality technical content.';
+    const response = await this.generateCompletion(prompt, systemPrompt, options);
+    return response.choices[0]?.message?.content || '';
+  }
+
   async generateRepresentation(
     lsu: string,
     representationType: 'rego' | 'tla' | 'python' | 'markdown'
