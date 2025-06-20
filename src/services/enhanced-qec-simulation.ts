@@ -221,6 +221,8 @@ export class EnhancedQecSimulationEngine {
       lsu_id: runId,
       status: hasErrors ? "INCOHERENT" : "COHERENT",
       confidence_level: analysis.confidence,
+     syndrome_vector: syndrome.stabilizer_measurements.map(measurement => measurement.measurement_result),
+     coherence_score: syndrome.confidence_score,
       ai_reasoning_summary: analysis.reasoningAnalysis?.reasoning || analysis.primaryAnalysis?.reasoning || "Standard analysis completed",
       semantic_violations: syndrome.detected_errors.map(error => ({
         violation_type: "semantic_inconsistency",
