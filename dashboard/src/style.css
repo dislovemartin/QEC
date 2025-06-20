@@ -1,0 +1,523 @@
+@@ .. @@
+ .donut-foreground { 
+   stroke: #4caf50;
+   transition: stroke-dashoffset 0.5s ease-in-out;
+   transform-origin: center;
+   transform: rotate(-90deg);
+ }
++
++/* QEC Analysis Panel Styles */
++.qec-analysis-panel {
++  background-color: #2f2f2f;
++  border-radius: 8px;
++  padding: 2rem;
++  border: 1px solid #444;
++  margin-top: 2rem;
++}
++
++.panel-header h2 {
++  color: #4caf50;
++  margin-bottom: 0.5rem;
++}
++
++.input-section {
++  margin: 1.5rem 0;
++}
++
++.input-section label {
++  display: block;
++  margin-bottom: 0.5rem;
++  color: #ccc;
++  font-weight: 600;
++}
++
++.input-section textarea {
++  width: 100%;
++  min-height: 120px;
++  padding: 1rem;
++  background-color: #1a1a1a;
++  border: 1px solid #555;
++  border-radius: 8px;
++  color: #fff;
++  font-family: inherit;
++  resize: vertical;
++}
++
++.analyze-btn {
++  background: linear-gradient(135deg, #4caf50, #45a049);
++  color: white;
++  border: none;
++  padding: 1rem 2rem;
++  border-radius: 8px;
++  font-weight: bold;
++  cursor: pointer;
++  margin-top: 1rem;
++  display: flex;
++  align-items: center;
++  gap: 0.5rem;
++  transition: all 0.3s ease;
++}
++
++.analyze-btn:hover:not(:disabled) {
++  transform: translateY(-2px);
++  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
++}
++
++.analyze-btn:disabled {
++  opacity: 0.6;
++  cursor: not-allowed;
++}
++
++.spinner {
++  width: 16px;
++  height: 16px;
++  border: 2px solid #ffffff;
++  border-top: 2px solid transparent;
++  border-radius: 50%;
++  animation: spin 1s linear infinite;
++}
++
++@keyframes spin {
++  0% { transform: rotate(0deg); }
++  100% { transform: rotate(360deg); }
++}
++
++.error-message {
++  background-color: #f44336;
++  color: white;
++  padding: 1rem;
++  border-radius: 8px;
++  margin: 1rem 0;
++  display: flex;
++  align-items: center;
++  gap: 0.5rem;
++}
++
++.analysis-results {
++  margin-top: 2rem;
++  padding-top: 2rem;
++  border-top: 1px solid #555;
++}
++
++.result-header {
++  display: flex;
++  justify-content: space-between;
++  align-items: center;
++  margin-bottom: 1.5rem;
++}
++
++.status-badge {
++  padding: 0.5rem 1rem;
++  border-radius: 20px;
++  font-weight: bold;
++  font-size: 0.8rem;
++  text-transform: uppercase;
++}
++
++.status-badge.compliant {
++  background-color: #4caf50;
++  color: white;
++}
++
++.status-badge.non_compliant {
++  background-color: #f44336;
++  color: white;
++}
++
++.status-badge.review_required {
++  background-color: #ff9800;
++  color: white;
++}
++
++.metrics-grid {
++  display: grid;
++  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
++  gap: 1rem;
++  margin-bottom: 2rem;
++}
++
++.metric {
++  text-align: center;
++  padding: 1rem;
++  background-color: #1a1a1a;
++  border-radius: 8px;
++  border: 1px solid #333;
++}
++
++.metric-value {
++  font-size: 2rem;
++  font-weight: bold;
++  color: #4caf50;
++  margin-bottom: 0.5rem;
++}
++
++.metric-label {
++  font-size: 0.9rem;
++  color: #999;
++}
++
++.artifacts-section, .opa-policy-section, .recommendations-section {
++  margin: 2rem 0;
++}
++
++.artifacts-grid {
++  display: grid;
++  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
++  gap: 1rem;
++}
++
++.artifact-card {
++  background-color: #1a1a1a;
++  border: 1px solid #333;
++  border-radius: 8px;
++  overflow: hidden;
++}
++
++.artifact-header {
++  display: flex;
++  justify-content: space-between;
++  align-items: center;
++  padding: 1rem;
++  background-color: #333;
++}
++
++.filename {
++  font-family: monospace;
++  color: #4caf50;
++  font-weight: bold;
++}
++
++.download-btn {
++  background: none;
++  border: none;
++  color: #ccc;
++  cursor: pointer;
++  font-size: 1.2rem;
++}
++
++.artifact-preview {
++  padding: 1rem;
++  font-family: monospace;
++  font-size: 0.8rem;
++  line-height: 1.4;
++  color: #ccc;
++  white-space: pre-wrap;
++}
++
++.policy-actions {
++  display: flex;
++  gap: 1rem;
++  margin-bottom: 1rem;
++}
++
++.deploy-btn, .validate-btn {
++  padding: 0.5rem 1rem;
++  border: none;
++  border-radius: 6px;
++  font-weight: bold;
++  cursor: pointer;
++  transition: all 0.3s ease;
++}
++
++.deploy-btn {
++  background-color: #4caf50;
++  color: white;
++}
++
++.validate-btn {
++  background-color: #2196f3;
++  color: white;
++}
++
++.policy-preview {
++  background-color: #1a1a1a;
++  border: 1px solid #333;
++  border-radius: 8px;
++  padding: 1rem;
++  overflow-x: auto;
++}
++
++.recommendations-section ul {
++  list-style: none;
++  padding: 0;
++}
++
++.recommendations-section li {
++  padding: 0.8rem;
++  margin: 0.5rem 0;
++  background-color: #1a1a1a;
++  border-left: 4px solid #4caf50;
++  border-radius: 4px;
++}
++
++/* Enhanced Audit Table Styles */
++.enhanced-audit-table {
++  background-color: #2f2f2f;
++  border-radius: 8px;
++  border: 1px solid #444;
++  overflow: hidden;
++}
++
++.audit-header {
++  display: flex;
++  justify-content: space-between;
++  align-items: center;
++  padding: 1.5rem;
++  background-color: #333;
++  border-bottom: 1px solid #555;
++}
++
++.audit-controls {
++  display: flex;
++  gap: 1rem;
++  align-items: center;
++}
++
++.filter-select {
++  background-color: #1a1a1a;
++  color: #fff;
++  border: 1px solid #555;
++  border-radius: 6px;
++  padding: 0.5rem 1rem;
++}
++
++.refresh-btn {
++  background-color: #4caf50;
++  color: white;
++  border: none;
++  padding: 0.5rem 1rem;
++  border-radius: 6px;
++  cursor: pointer;
++  font-weight: bold;
++}
++
++.audit-table {
++  width: 100%;
++  border-collapse: collapse;
++}
++
++.audit-table th {
++  background-color: #444;
++  color: #ccc;
++  padding: 1rem;
++  text-align: left;
++  font-weight: bold;
++  border-bottom: 2px solid #555;
++}
++
++.audit-row {
++  border-bottom: 1px solid #444;
++  transition: background-color 0.2s ease;
++}
++
++.audit-row:hover {
++  background-color: #383838;
++}
++
++.audit-row.qec-enhanced {
++  border-left: 4px solid #4caf50;
++}
++
++.audit-table td {
++  padding: 1rem;
++  vertical-align: top;
++}
++
++.model-icon {
++  font-size: 1.2rem;
++  margin-right: 0.5rem;
++}
++
++.model-info {
++  display: flex;
++  flex-direction: column;
++  gap: 0.25rem;
++}
++
++.enhancement-badge {
++  background-color: #4caf50;
++  color: white;
++  font-size: 0.7rem;
++  padding: 0.2rem 0.5rem;
++  border-radius: 10px;
++  width: fit-content;
++}
++
++.confidence-bar {
++  width: 100px;
++  height: 16px;
++  background-color: #555;
++  border-radius: 8px;
++  position: relative;
++  margin-top: 0.25rem;
++}
++
++.confidence-fill {
++  height: 100%;
++  background: linear-gradient(90deg, #f44336, #ff9800, #4caf50);
++  border-radius: 8px;
++  transition: width 0.3s ease;
++}
++
++.confidence-text {
++  position: absolute;
++  top: 0;
++  left: 50%;
++  transform: translateX(-50%);
++  font-size: 0.7rem;
++  line-height: 16px;
++  color: white;
++  font-weight: bold;
++}
++
++.decision-badge {
++  padding: 0.4rem 0.8rem;
++  border-radius: 15px;
++  font-weight: bold;
++  font-size: 0.8rem;
++}
++
++.decision-badge.allow {
++  background-color: #4caf50;
++  color: white;
++}
++
++.decision-badge.deny {
++  background-color: #f44336;
++  color: white;
++}
++
++.processing-time {
++  font-size: 0.7rem;
++  color: #999;
++  margin-top: 0.25rem;
++}
++
++.compliance-badge {
++  padding: 0.3rem 0.6rem;
++  border-radius: 12px;
++  font-weight: bold;
++  font-size: 0.7rem;
++  text-transform: uppercase;
++}
++
++.compliance-badge.compliant {
++  background-color: #4caf50;
++  color: white;
++}
++
++.compliance-badge.non-compliant {
++  background-color: #f44336;
++  color: white;
++}
++
++.compliance-badge.review-required {
++  background-color: #ff9800;
++  color: white;
++}
++
++.violations {
++  position: relative;
++}
++
++.violation-count {
++  color: #f44336;
++  font-weight: bold;
++  cursor: pointer;
++}
++
++.violation-tooltip {
++  display: none;
++  position: absolute;
++  top: 100%;
++  left: 0;
++  background-color: #1a1a1a;
++  border: 1px solid #f44336;
++  border-radius: 8px;
++  padding: 1rem;
++  z-index: 1000;
++  min-width: 300px;
++  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
++}
++
++.violations:hover .violation-tooltip {
++  display: block;
++}
++
++.violation-item {
++  padding: 0.25rem 0;
++  color: #f44336;
++  font-size: 0.8rem;
++}
++
++.no-violations {
++  color: #4caf50;
++  font-weight: bold;
++}
++
++.action-buttons {
++  display: flex;
++  gap: 0.5rem;
++}
++
++.btn-secondary {
++  background-color: #555;
++  color: #ccc;
++  border: none;
++  padding: 0.4rem 0.8rem;
++  border-radius: 6px;
++  cursor: pointer;
++  font-size: 0.8rem;
++  transition: background-color 0.2s ease;
++}
++
++.btn-secondary:hover {
++  background-color: #666;
++}
++
++.audit-loading {
++  text-align: center;
++  padding: 3rem;
++}
++
++.spinner-large {
++  width: 48px;
++  height: 48px;
++  border: 4px solid #555;
++  border-top: 4px solid #4caf50;
++  border-radius: 50%;
++  animation: spin 1s linear infinite;
++  margin: 0 auto 1rem;
++}
++
++.no-logs {
++  text-align: center;
++  padding: 3rem;
++  color: #999;
++}
++
++.section-tabs {
++  display: flex;
++  margin-bottom: 1rem;
++}
++
++.tab-button {
++  background-color: #555;
++  color: #ccc;
++  border: none;
++  padding: 0.8rem 1.5rem;
++  cursor: pointer;
++  border-top-left-radius: 8px;
++  border-top-right-radius: 8px;
++  margin-right: 2px;
++  transition: all 0.2s ease;
++}
++
++.tab-button.active {
++  background-color: #4caf50;
++  color: white;
++}
++
++.tab-button:hover:not(.active) {
++  background-color: #666;
++}

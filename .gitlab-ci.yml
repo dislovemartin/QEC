@@ -1,0 +1,39 @@
+@@ .. @@
+   rules:
+     - if: '$CI_COMMIT_BRANCH == "main"'
+       when: on_success
++
++# QEC-SFT Enhanced Analysis Stage
++qec_enhanced_analysis:
++  stage: governance-gate
++  image: python:3.9-slim
++  script:
++    - echo "Running QEC-SFT enhanced governance analysis..."
++    - pip install requests
++    - python ./scripts/qec_enhanced_analysis.py > qec_evidence.json
++    - echo "Submitting to QEC-AI service for analysis..."
++    - |
++      RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
++        --data-binary @qec_evidence.json \
++        $QEC_AI_SERVICE_ENDPOINT/api/v1/qec/analyze)
++      if [ "$RESPONSE" -ne 200 ]; then
++        echo "Error: QEC analysis request failed with status $RESPONSE"
++        exit 1
++      fi
++      QEC_RESULT=$(curl -s --data-binary @qec_evidence.json $QEC_AI_SERVICE_ENDPOINT/api/v1/qec/analyze)
++      echo "QEC Analysis Result: $QEC_RESULT"
++      COMPLIANCE_STATUS=$(echo $QEC_RESULT | jq -r .compliance_status)
++      if [ "$COMPLIANCE_STATUS" = "NON_COMPLIANT" ]; then
++        echo "QEC Enhanced Governance Gate: DENIED"
++        echo "Reason: $COMPLIANCE_STATUS"
++        exit 1
++      else
++        echo "QEC Enhanced Governance Gate: APPROVED"
++        echo "Compliance Status: $COMPLIANCE_STATUS"
++      fi
++  variables:
++    QEC_AI_SERVICE_ENDPOINT: "http://qec-ai-service.acgs-pgp.svc.cluster.local:8080"
++  rules:
++    - if: '$CI_COMMIT_BRANCH == "main"'
++      when: on_success
++    - when: manual

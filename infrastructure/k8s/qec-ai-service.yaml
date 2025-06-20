@@ -1,0 +1,144 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qec-ai-service
+  namespace: acgs-pgp
+  labels:
+    app: qec-ai-service
+    component: ai-analysis
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: qec-ai-service
+  template:
+    metadata:
+      labels:
+        app: qec-ai-service
+        component: ai-analysis
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+      - name: qec-ai-service
+        image: acgs-pgp/qec-ai-service:latest
+        ports:
+        - containerPort: 8080
+          name: http
+        - containerPort: 8081
+          name: health
+        env:
+        - name: NVIDIA_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: ai-api-keys
+              key: nvidia-api-key
+        - name: GROQ_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: ai-api-keys
+              key: groq-api-key
+        - name: OPA_ENDPOINT
+          value: "http://opa-service:8181"
+        - name: PROMETHEUS_METRICS_ENABLED
+          value: "true"
+        - name: LOG_LEVEL
+          value: "info"
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi" 
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8081
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8081
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        volumeMounts:
+        - name: config
+          mountPath: /app/config
+          readOnly: true
+      volumes:
+      - name: config
+        configMap:
+          name: qec-ai-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: qec-ai-service
+  namespace: acgs-pgp
+  labels:
+    app: qec-ai-service
+spec:
+  selector:
+    app: qec-ai-service
+  ports:
+  - port: 8080
+    targetPort: 8080
+    name: http
+  - port: 8081
+    targetPort: 8081
+    name: health
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: qec-ai-config
+  namespace: acgs-pgp
+data:
+  app.yaml: |
+    server:
+      port: 8080
+      health_port: 8081
+      
+    ai_providers:
+      nvidia:
+        model: "nvidia/llama-3.1-nemotron-ultra-253b-v1"
+        timeout: 30s
+        retry_attempts: 3
+      groq:
+        model: "qwen/qwen3-32b"
+        timeout: 15s
+        retry_attempts: 2
+        
+    qec_analysis:
+      stabilizer_checks:
+        - syntax_validation
+        - semantic_consistency
+        - security_analysis
+        - performance_check
+        - compliance_audit
+      coherence_threshold: 0.7
+      
+    opa_integration:
+      policy_prefix: "acgs.qec"
+      auto_deploy: false
+      validation_enabled: true
+      
+    monitoring:
+      metrics_enabled: true
+      metrics_path: "/metrics"
+      log_level: "info"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ai-api-keys
+  namespace: acgs-pgp
+type: Opaque
+data:
+  # Base64 encoded API keys (replace with actual keys)
+  nvidia-api-key: eW91cl9udmlkaWFfYXBpX2tleV9oZXJl
+  groq-api-key: eW91cl9ncm9xX2FwaV9rZXlfaGVyZQ==

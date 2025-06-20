@@ -1,0 +1,155 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway-enhanced
+  namespace: acgs-pgp
+  labels:
+    app: api-gateway
+    version: enhanced
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: api-gateway
+      version: enhanced
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+        version: enhanced
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+      - name: gateway
+        image: acgs-pgp/api-gateway:enhanced
+        ports:
+        - containerPort: 8080
+          name: http
+        - containerPort: 9090
+          name: metrics
+        env:
+        - name: OPA_ENDPOINT
+          value: "http://opa-service:8181"
+        - name: QEC_AI_SERVICE_ENDPOINT
+          value: "http://qec-ai-service:8080"
+        - name: QEC_INTEGRATION_ENABLED
+          value: "true"
+        - name: CORS_ALLOWED_ORIGINS
+          value: "*"
+        - name: AUTH_ENABLED
+          value: "true"
+        - name: RATE_LIMIT_ENABLED
+          value: "true"
+        - name: RATE_LIMIT_RPS
+          value: "100"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        volumeMounts:
+        - name: gateway-config
+          mountPath: /app/config
+          readOnly: true
+      volumes:
+      - name: gateway-config
+        configMap:
+          name: gateway-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-gateway-enhanced
+  namespace: acgs-pgp
+  labels:
+    app: api-gateway
+    version: enhanced
+spec:
+  selector:
+    app: api-gateway
+    version: enhanced
+  ports:
+  - port: 80
+    targetPort: 8080
+    name: http
+  - port: 9090
+    targetPort: 9090
+    name: metrics
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gateway-config
+  namespace: acgs-pgp
+data:
+  routes.yaml: |
+    routes:
+      # Traditional OPA routes
+      - path: /v1/data/*
+        upstream: http://opa-service:8181
+        methods: [GET, POST, PUT, DELETE]
+        auth_required: true
+        rate_limit: 50
+        
+      # QEC-SFT Enhanced routes
+      - path: /api/v1/qec/analyze
+        upstream: http://qec-ai-service:8080
+        methods: [POST]
+        auth_required: true
+        rate_limit: 10
+        timeout: 60s
+        
+      - path: /api/v1/qec/status
+        upstream: http://qec-ai-service:8080
+        methods: [GET]
+        auth_required: false
+        rate_limit: 100
+        
+      # Audit and monitoring routes
+      - path: /api/v1/audit/*
+        upstream: http://audit-service:8080
+        methods: [GET, POST]
+        auth_required: true
+        rate_limit: 50
+        
+      # Dashboard routes
+      - path: /api/v1/dashboard/*
+        upstream: http://dashboard-backend:8080
+        methods: [GET]
+        auth_required: true
+        rate_limit: 100
+        
+    cors:
+      allowed_origins: ["*"]
+      allowed_methods: [GET, POST, PUT, DELETE, OPTIONS]
+      allowed_headers: [Content-Type, Authorization, X-Requested-With]
+      max_age: 86400
+      
+    auth:
+      jwt_secret_key: "${JWT_SECRET_KEY}"
+      token_header: "Authorization"
+      token_prefix: "Bearer "
+      
+    rate_limiting:
+      enabled: true
+      default_limit: 100
+      window_size: "1m"
+      storage: "memory"
