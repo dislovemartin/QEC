@@ -220,10 +220,10 @@ export class EnhancedQecSimulationEngine {
       signature_metadata: {
         signing_algorithm: "ECDSA-SHA256-MultiAI",
         ai_model_version: analysis.providerUsed === 'hybrid' ? 
-          "nvidia/llama-3.1-nemotron-ultra-253b-v1 + qwen-qwq-32b" :
+          "nvidia/llama-3.1-nemotron-ultra-253b-v1 + qwen/qwen3-32b" :
           analysis.providerUsed === 'nvidia' ?
           "nvidia/llama-3.1-nemotron-ultra-253b-v1" :
-          "qwen-qwq-32b",
+          "qwen/qwen3-32b",
         confidence_threshold: 0.85,
         multi_ai_consensus: analysis.providerUsed === 'hybrid'
       }
@@ -360,10 +360,10 @@ ${analysis.recommendations?.map((rec, i) => `${i + 1}. ${rec}`).join('\n') || '1
           processing_duration_ms: processingDuration,
           version: "v8.2.0-production",
           ai_model: enhancedAnalysis.providerUsed === 'hybrid' ? 
-            "nvidia/llama-3.1-nemotron-ultra-253b-v1 + qwen-qwq-32b" :
+            "nvidia/llama-3.1-nemotron-ultra-253b-v1 + qwen/qwen3-32b" :
             enhancedAnalysis.providerUsed === 'nvidia' ?
             "nvidia/llama-3.1-nemotron-ultra-253b-v1" :
-            "qwen-qwq-32b",
+            "qwen/qwen3-32b",
           analysis_confidence: enhancedAnalysis.confidence,
           reasoning_enabled: !!enhancedAnalysis.reasoningAnalysis
         }

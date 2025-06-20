@@ -33,7 +33,7 @@ export class GroqAIService {
   constructor() {
     const apiKey = import.meta.env.VITE_GROQ_API_KEY;
     const baseUrl = import.meta.env.VITE_GROQ_BASE_URL || 'https://api.groq.com/openai/v1';
-    const model = import.meta.env.VITE_GROQ_MODEL || 'qwen-qwq-32b';
+    const model = import.meta.env.VITE_GROQ_MODEL || 'qwen/qwen3-32b';
 
     if (!apiKey || apiKey.includes('your_') || apiKey === 'your_actual_groq_api_key_here') {
       console.warn('Groq API key not configured properly. Reasoning analysis will use fallback mode.');

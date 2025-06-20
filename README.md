@@ -56,7 +56,7 @@ VITE_NVIDIA_MODEL=nvidia/llama-3.1-nemotron-ultra-253b-v1
 # Groq API Configuration  
 VITE_GROQ_API_KEY=your_groq_api_key
 VITE_GROQ_BASE_URL=https://api.groq.com/openai/v1
-VITE_GROQ_MODEL=qwen-qwq-32b
+VITE_GROQ_MODEL=qwen/qwen3-32b
 ```
 
 ## 🎯 Usage
