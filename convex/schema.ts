@@ -83,7 +83,7 @@ export default defineSchema({
     ai_provider_used: v.optional(v.string()),
     user_id: v.optional(v.string()), // For future user management
   })
-    .index("by_lsu_id", ["lsu_id"])
+    .index("by_lsu_id", ["lsu_input"])
     .index("by_created_at", ["created_at"])
     .index("by_user", ["user_id"])
     .index("by_status", ["certificate_of_semantic_integrity.status"]),
