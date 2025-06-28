@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Shield, AlertTriangle, CheckCircle, Copy, Download, Brain, ChevronDown, ChevronUp, ExternalLink, HelpCircle, FileText, Code, TestTube, BookOpen, TrendingUp } from 'lucide-react';
 import { CertifiedArtifactPackage } from '../types/qec-types';
+import EnhancedScrollableContainer from './EnhancedScrollableContainer';
 
 interface EnhancedResultDisplayProps {
   result: CertifiedArtifactPackage;
@@ -372,11 +373,17 @@ const EnhancedResultDisplay: React.FC<EnhancedResultDisplayProps> = ({ result })
                 </div>
                 
                 {isExpanded && (
-                  <div className="animate-slide-down">
-                    <pre className="p-4 text-sm overflow-x-auto surface-1 border-t border-gray-700">
-                      <code className="text-white">{content}</code>
+                  <EnhancedScrollableContainer
+                    maxHeight="32rem"
+                    className="animate-slide-down surface-1 border-t border-gray-700"
+                    showScrollIndicators={true}
+                  >
+                    <pre className="p-4 text-sm font-mono leading-relaxed">
+                      <code className="text-white whitespace-pre-wrap break-words">
+                        {content}
+                      </code>
                     </pre>
-                  </div>
+                  </EnhancedScrollableContainer>
                 )}
               </div>
             );

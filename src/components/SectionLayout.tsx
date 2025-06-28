@@ -5,18 +5,24 @@ import EnhancedResultDisplay from './EnhancedResultDisplay';
 import HelpSection from './HelpSection';
 import LoadingProgress from './LoadingProgress';
 import SuccessMessage from './SuccessMessage';
+import ScrollToTopButton from './ScrollToTopButton';
+import useSmoothScroll from '../hooks/useSmoothScroll';
 import { useEnhancedQecPipeline } from '../hooks/useEnhancedQecPipeline';
 
 const SectionLayout: React.FC = () => {
   const [currentSection, setCurrentSection] = useState('input');
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const { runEnhancedPipeline, isLoading, error, result, clearResult, aiStatus, checkAIStatus } = useEnhancedQecPipeline();
+  const { scrollToElement, scrollToTop, showScrollToTop, isScrolling } = useSmoothScroll();
 
   // Auto-switch to analysis section when results are available
   useEffect(() => {
     if (result && currentSection === 'input') {
       setShowSuccessMessage(true);
-      setCurrentSection('analysis');
+      setTimeout(() => {
+        setCurrentSection('analysis');
+        scrollToElement('section-analysis');
+      }, 500);
       // Hide success message after 3 seconds
       setTimeout(() => setShowSuccessMessage(false), 3000);
     }
@@ -30,14 +36,11 @@ const SectionLayout: React.FC = () => {
 
   const scrollToSection = (sectionId: string) => {
     setCurrentSection(sectionId);
-    const element = document.getElementById(`section-${sectionId}`);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+    scrollToElement(`section-${sectionId}`, { block: 'start' });
   };
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-black relative">
       <NavigationBar 
         currentSection={currentSection}
         onSectionChange={scrollToSection}
@@ -55,8 +58,15 @@ const SectionLayout: React.FC = () => {
         />
       )}
       
+      {/* Scroll to Top Button */}
+      <ScrollToTopButton 
+        show={showScrollToTop}
+        onClick={scrollToTop}
+        className={isScrolling ? 'scale-105' : ''}
+      />
+      
       <main className="pb-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" id="main-content">
           {/* Input Section */}
           <section id="section-input" className="py-8">
             <EnhancedQecPipelineRunner

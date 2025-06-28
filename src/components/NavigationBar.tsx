@@ -5,12 +5,14 @@ interface NavigationBarProps {
   currentSection?: string;
   onSectionChange?: (section: string) => void;
   hasResults?: boolean;
+  isScrolling?: boolean;
 }
 
 const NavigationBar: React.FC<NavigationBarProps> = ({ 
   currentSection = 'input', 
   onSectionChange,
-  hasResults = false 
+  hasResults = false,
+  isScrolling = false
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -28,7 +30,9 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
   return (
     <>
       {/* Desktop Navigation */}
-      <nav className="hidden md:flex items-center justify-between bg-surface-2 border-b border-gray-700 px-6 py-3 sticky top-0 z-40">
+      <nav className={`hidden md:flex items-center justify-between bg-surface-2 border-b border-gray-700 px-6 py-3 sticky top-0 z-40 transition-all duration-200 ${
+        isScrolling ? 'backdrop-blur-md bg-surface-2/90' : ''
+      }`}>
         <div className="flex items-center gap-2">
           <Shield className="h-6 w-6 accent" />
           <span className="font-bold text-lg">QEC-SFT</span>
@@ -59,7 +63,9 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
       </nav>
 
       {/* Mobile Navigation */}
-      <nav className="md:hidden bg-surface-2 border-b border-gray-700 px-4 py-3 sticky top-0 z-40">
+      <nav className={`md:hidden bg-surface-2 border-b border-gray-700 px-4 py-3 sticky top-0 z-40 transition-all duration-200 ${
+        isScrolling ? 'backdrop-blur-md bg-surface-2/90' : ''
+      }`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Shield className="h-5 w-5 accent" />
